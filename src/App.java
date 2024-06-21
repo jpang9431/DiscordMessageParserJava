@@ -8,15 +8,16 @@ import java.util.Comparator;
 
 public class App {
     private static final String[] charactersToRemove = { ",", ".", "\"", "?", "!", "*", "(", ")", "<", ">" };
-    private static final HashMap<String, String> replacePings = new HashMap<>();
-    private static final HashMap<String, String> replaceChannelMentions = new HashMap<>();
-    private static final HashMap<String, String> reaplceRoleMentions = new HashMap<>();
+    private static final HashMap<String, String> sepcialSequencesToReplace = new HashMap<>();
+    private static final String sepcialCharacterReplaceFilePath = "";
+    private static final String outputFilePath = "src\\output.txt";
+    private static final String inputDiscordTextFilePath = "";
+
 
     public static void setMaps() {
         try {
-            updateHashMap("src\\users.txt", replacePings);
-            updateHashMap("src\\roles.txt", reaplceRoleMentions);
-            updateHashMap("src\\channelIds.txt", replaceChannelMentions);
+            updateHashMap(sepcialCharacterReplaceFilePath,
+                    sepcialSequencesToReplace);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -67,12 +68,8 @@ public class App {
     }
 
     private static void updateWord(String word, HashMap<String, Word> wordMap, ArrayList<Word> wordsList) {
-        if (reaplceRoleMentions.containsKey(word)) {
-            word = reaplceRoleMentions.get(word);
-        } else if (replacePings.containsKey(word)) {
-            word = replacePings.get(word);
-        } else if (replaceChannelMentions.containsKey(word)) {
-            word = replaceChannelMentions.get(word);
+        if (sepcialSequencesToReplace.containsKey(word)) {
+            word = sepcialSequencesToReplace.get(word);
         } else if (word.contains("https://")) {
             word = "https://";
         }
@@ -100,7 +97,7 @@ public class App {
 
     public static void countWordsForAll() {
         try {
-            File file = new File("src\\discordMessages.txt");
+            File file = new File(inputDiscordTextFilePath);
             Scanner reader = new Scanner(file);
             HashMap<String, Word> wordMap = new HashMap<>();
             ArrayList<Word> wordList = new ArrayList<>();
@@ -111,7 +108,7 @@ public class App {
             }
             reader.close();
             wordList.sort(Comparator.reverseOrder());
-            FileWriter output = new FileWriter("src\\output.txt");
+            FileWriter output = new FileWriter(outputFilePath);
             output.write(wordList.toString());
             output.close();
         } catch (Exception e) {
@@ -125,18 +122,18 @@ public class App {
             Scanner reader = new Scanner(file);
             HashMap<String, HashMap<String, Word>> userWordMap = new HashMap<>();
             HashMap<String, ArrayList<Word>> userWordList = new HashMap<>();
-            while (reader.hasNextLine()){
+            while (reader.hasNextLine()) {
                 String line = reader.nextLine();
                 int index = line.indexOf(",");
-                String name = line.substring(0,index);
-                if (!userWordMap.containsKey(name)){
+                String name = line.substring(0, index);
+                if (!userWordMap.containsKey(name)) {
                     userWordMap.put(name, new HashMap<>());
                     userWordList.put(name, new ArrayList<>());
                 }
-                updateMapAndArray(userWordMap.get(name), userWordList.get(name), line.substring(index+1));
+                updateMapAndArray(userWordMap.get(name), userWordList.get(name), line.substring(index + 1));
             }
-            FileWriter output = new FileWriter("src\\output.txt");
-            for (Map.Entry<String, ArrayList<Word>> entry : userWordList.entrySet()){
+            FileWriter output = new FileWriter(outputFilePath);
+            for (Map.Entry<String, ArrayList<Word>> entry : userWordList.entrySet()) {
                 entry.getValue().sort(Comparator.reverseOrder());
                 String line = entry.getKey() + " | " + entry.getValue().toString();
                 output.write(line);
